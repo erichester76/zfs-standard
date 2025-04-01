@@ -1,0 +1,16 @@
+---
+- name: Firewall Configuration
+  hosts: zfs_server
+  become: yes
+  vars:
+    firewall_services:
+      - nfs
+      - samba
+  tasks:
+    - name: Allow specified services
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        state: enabled
+        immediate: yes
+      loop: "{{ firewall_services }}"

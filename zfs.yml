@@ -2,14 +2,8 @@
 - name: ZFS Configuration
   hosts: zfs_server
   become: yes
-  vars:
-    zpool_name: tank
-    zfs_dataset: tank/vmware
-    disks: []  # List of disks, e.g., [/dev/mapper/encrypted_sda, ..., /dev/mapper/encrypted_sdbh]
-    vdev_count: 7
-    disks_per_vdev: 8
-    total_disks_for_vdevs: "{{ vdev_count * disks_per_vdev }}"
-    spare_count: 4
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Validate disk count
       assert:

@@ -2,8 +2,8 @@
 - name: NFS-Ganesha Configuration
   hosts: zfs_server
   become: yes
-  vars:
-    zfs_dataset_mountpoint: /tank/vmware
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Configure NFS-Ganesha
       template:

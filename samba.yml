@@ -2,11 +2,8 @@
 - name: Samba Configuration
   hosts: zfs_server
   become: yes
-  vars:
-    samba_share_name: vmware
-    zfs_dataset_mountpoint: /tank/vmware
-    samba_users:
-      - username  # Define users in vars or inventory
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Configure Samba
       template:

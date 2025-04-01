@@ -2,15 +2,7 @@
 - name: System Setup
   hosts: zfs_server
   become: yes
-  vars:
-    packages:
-      - zfs
-      - nfs-ganesha
-      - nfs-ganesha-zfs
-      - samba
-      - cryptsetup
-      - ethtool
-      - nmcli
+
   tasks:
     - name: Update system
       yum:

@@ -2,10 +2,8 @@
 - name: Firewall Configuration
   hosts: zfs_server
   become: yes
-  vars:
-    firewall_services:
-      - nfs
-      - samba
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Allow specified services
       firewalld:

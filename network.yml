@@ -2,11 +2,8 @@
 - name: Network Configuration
   hosts: zfs_server
   become: yes
-  vars:
-    bond_name: bond0
-    nic1: eth0
-    nic2: eth1
-    mtu: 9000
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Load bonding module
       modprobe:

@@ -1,4 +1,13 @@
----
+# Additional Packages
+packages:
+  - zfs
+  - nfs-ganesha
+  - nfs-ganesha-zfs
+  - samba
+  - cryptsetup
+  - ethtool
+  - nmcli
+
 # Network variables
 bond_name: bond0
 nic1: eth0

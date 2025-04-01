@@ -2,9 +2,8 @@
 - name: LUKS Encryption Setup
   hosts: zfs_server
   become: yes
-  vars:
-    disks: []  # Define in vars/main.yml or inventory, e.g., [/dev/sda, ..., /dev/sdbh]
-    luks_passphrase: "{{ vault_luks_passphrase }}"  # Store in Ansible Vault
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Check if disk is LUKS formatted
       command: cryptsetup isLuks {{ item }}
@@ -14,7 +13,7 @@
       loop: "{{ disks }}"
 
     - name: Format disks with LUKS if not already
-      shell: echo "{{ luks_passphrase }}" | cryptsetup luksFormat --batch-mode - {{ item.item }}
+      shell: echo "{{ vault_luks_passphrase }}" | cryptsetup luksFormat --batch-mode - {{ item.item }}
       when: item.rc != 0
       loop: "{{ is_luks.results }}"
 

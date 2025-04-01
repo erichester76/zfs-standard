@@ -1,0 +1,28 @@
+---
+- name: System Setup
+  hosts: zfs_server
+  become: yes
+  vars:
+    packages:
+      - zfs
+      - nfs-ganesha
+      - nfs-ganesha-zfs
+      - samba
+      - cryptsetup
+      - ethtool
+      - nmcli
+  tasks:
+    - name: Update system
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install OpenZFS release package
+      yum:
+        name: oracle-openzfs-release-el8
+        state: present
+
+    - name: Install required packages
+      yum:
+        name: "{{ packages }}"
+        state: present

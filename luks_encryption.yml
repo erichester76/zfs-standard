@@ -1,0 +1,35 @@
+---
+- name: LUKS Encryption Setup
+  hosts: zfs_server
+  become: yes
+  vars:
+    disks: []  # Define in vars/main.yml or inventory, e.g., [/dev/sda, ..., /dev/sdbh]
+    luks_passphrase: "{{ vault_luks_passphrase }}"  # Store in Ansible Vault
+  tasks:
+    - name: Check if disk is LUKS formatted
+      command: cryptsetup isLuks {{ item }}
+      register: is_luks
+      failed_when: false
+      changed_when: false
+      loop: "{{ disks }}"
+
+    - name: Format disks with LUKS if not already
+      shell: echo "{{ luks_passphrase }}" | cryptsetup luksFormat --batch-mode - {{ item.item }}
+      when: item.rc != 0
+      loop: "{{ is_luks.results }}"
+
+    - name: Open LUKS devices
+      command: cryptsetup luksOpen {{ item }} encrypted_{{ item | basename }}
+      loop: "{{ disks }}"
+
+    - name: Get UUIDs of disks
+      command: blkid -s UUID -o value {{ item }}
+      register: disk_uuids
+      loop: "{{ disks }}"
+
+    - name: Add entries to /etc/crypttab
+      lineinfile:
+        path: /etc/crypttab
+        line: "encrypted_{{ item.item | basename }} UUID={{ item.stdout }} none"
+        state: present
+      loop: "{{ disk_uuids.results }}"

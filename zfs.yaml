@@ -1,0 +1,37 @@
+---
+- name: ZFS Configuration
+  hosts: zfs_server
+  become: yes
+  vars:
+    zpool_name: tank
+    zfs_dataset: tank/vmware
+    disks: []  # List of disks, e.g., [/dev/mapper/encrypted_sda, ..., /dev/mapper/encrypted_sdbh]
+    vdev_count: 7
+    disks_per_vdev: 8
+    total_disks_for_vdevs: "{{ vdev_count * disks_per_vdev }}"
+    spare_count: 4
+  tasks:
+    - name: Validate disk count
+      assert:
+        that:
+          - disks | length >= total_disks_for_vdevs + spare_count
+        fail_msg: "Insufficient disks: {{ disks | length }} provided, but {{ total_disks_for_vdevs + spare_count }} required."
+
+    - name: Create ZFS pool with dynamic vdevs
+      command: >
+        zpool create -f -o ashift=12 {{ zpool_name }}
+        {% for vdev in range(0, total_disks_for_vdevs, disks_per_vdev) %}
+        raidz2 {{ disks[vdev:vdev + disks_per_vdev] | join(' ') }}
+        {% endfor %}
+        spare {{ disks[total_disks_for_vdevs:total_disks_for_vdevs + spare_count] | join(' ') }}
+      args:
+        creates: /{{ zpool_name }}
+
+    - name: Create ZFS dataset
+      zfs:
+        name: "{{ zfs_dataset }}"
+        state: present
+        extra_zfs_properties:
+          recordsize: 64K
+          compression: lz4
+          atime: off

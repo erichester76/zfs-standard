@@ -1,0 +1,26 @@
+---
+- name: Samba Configuration
+  hosts: zfs_server
+  become: yes
+  vars:
+    samba_share_name: vmware
+    zfs_dataset_mountpoint: /tank/vmware
+    samba_users:
+      - username  # Define users in vars or inventory
+  tasks:
+    - name: Configure Samba
+      template:
+        src: templates/smb.conf.j2
+        dest: /etc/samba/smb.conf
+        mode: '0644'
+
+    - name: Add Samba users
+      command: echo -e "password\npassword" | smbpasswd -a -s {{ item }}
+      loop: "{{ samba_users }}"
+      no_log: true
+
+    - name: Enable and start Samba
+      systemd:
+        name: smb
+        enabled: yes
+        state: started

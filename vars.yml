@@ -1,0 +1,31 @@
+---
+# Network variables
+bond_name: bond0
+nic1: eth0
+nic2: eth1
+mtu: 9000
+
+# LUKS variables
+disks: []  # List 60 disks, e.g., [/dev/sda, ..., /dev/sdbh]
+# luks_passphrase defined in Ansible Vault
+
+# ZFS variables
+zpool_name: tank
+zfs_dataset: tank/vmware
+vdev_count: 7
+disks_per_vdev: 8
+total_disks_for_vdevs: "{{ vdev_count * disks_per_vdev }}"
+spare_count: 4
+
+# NFS-Ganesha variables
+zfs_dataset_mountpoint: /tank/vmware
+
+# Samba variables
+samba_share_name: vmware
+samba_users:
+  - username
+
+# Firewall variables
+firewall_services:
+  - nfs
+  - samba

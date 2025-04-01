@@ -1,0 +1,56 @@
+---
+- name: Network Configuration
+  hosts: zfs_server
+  become: yes
+  vars:
+    bond_name: bond0
+    nic1: eth0
+    nic2: eth1
+    mtu: 9000
+  tasks:
+    - name: Load bonding module
+      modprobe:
+        name: bonding
+        state: present
+
+    - name: Create bond interface
+      command: nmcli con add type bond ifname {{ bond_name }} bond.options "mode=4,miimon=100"
+      args:
+        creates: /sys/class/net/{{ bond_name }}
+      register: bond_create
+      changed_when: bond_create.rc == 0
+
+    - name: Add NICs to bond
+      command: nmcli con add type ethernet ifname {{ item }} master {{ bond_name }}
+      loop:
+        - "{{ nic1 }}"
+        - "{{ nic2 }}"
+      when: bond_create.rc == 0
+
+    - name: Set MTU
+      command: nmcli con mod {{ bond_name }} ethernet.mtu {{ mtu }}
+      ignore_errors: yes
+
+    - name: Activate bond
+      command: nmcli con up {{ bond_name }}
+      ignore_errors: yes
+
+    - name: Configure TCP settings
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+      loop:
+        - { name: 'net.core.rmem_max', value: '16777216' }
+        - { name: 'net.core.wmem_max', value: '16777216' }
+        - { name: 'net.ipv4.tcp_rmem', value: '4096 87380 16777216' }
+        - { name: 'net.ipv4.tcp_wmem', value: '4096 65536 16777216' }
+
+    - name: Set ring buffer sizes
+      command: ethtool -G {{ bond_name }} rx 4096 tx 4096
+      ignore_errors: yes
+
+    - name: Set multi-queue
+      command: ethtool -L {{ bond_name }} combined 8
+      ignore_errors: yes

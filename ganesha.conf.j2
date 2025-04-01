@@ -1,0 +1,14 @@
+EXPORT {
+    Export_Id = 1;
+    Path = {{ zfs_dataset_mountpoint }};
+    Pseudo = /vmware;
+    Access_Type = RW;
+    SecType = "sys";
+    Protocols = 4;
+    FSAL {
+        Name = ZFS;
+    }
+}
+NFS_Core_Param {
+    Nb_Worker = 16;
+}

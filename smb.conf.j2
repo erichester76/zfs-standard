@@ -1,0 +1,10 @@
+[global]
+    workgroup = MYGROUP
+    server string = Samba Server
+    security = user
+    vfs objects = zfsacl
+
+[{{ samba_share_name }}]
+    path = {{ zfs_dataset_mountpoint }}
+    read only = no
+    guest ok = no

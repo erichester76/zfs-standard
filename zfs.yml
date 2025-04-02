@@ -11,8 +11,8 @@
     - name: Validate disk count
       assert:
         that:
-          - disks | length >= total_disks_for_vdevs + spare_count
-        fail_msg: "Insufficient disks: {{ disks | length }} provided, but {{ total_disks_for_vdevs + spare_count }} required."
+          - encrypted_devices | length >= total_disks_for_vdevs + spare_count
+        fail_msg: "Insufficient disks: {{ encrypted_devices | length }} provided, but {{ total_disks_for_vdevs + spare_count }} required."
 
     - name: Create ZFS pool with encrypted multipath devices
       command: >

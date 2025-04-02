@@ -94,7 +94,6 @@ The playbooks configure the following settings on ZFS servers:
 - **Firewall**: Enables `firewalld` with allowed services (NFS, Samba).
 - **SELinux**: Sets to permissive mode (configurable).
 - **Audit**: Configures `auditd` for command logging.
-- **Fail2ban**: Protects against brute-force attacks.
 
 ---
 

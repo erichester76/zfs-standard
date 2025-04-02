@@ -44,6 +44,12 @@ The repository is organized into multiple YAML files, each handling a specific p
 - **`inventory/netbox_inventory.yml`**  
   A dynamic inventory file using the Netbox plugin to fetch devices with the "zfs-server" role and "active" status.
 
+- **`templates/smb.conf.j2`**
+  Base samba configuraiton file
+
+- **`templates/ganehsa.conf.j2`**
+  Base nfs configuraiton file
+
 ---
 
 ## Summary of Settings

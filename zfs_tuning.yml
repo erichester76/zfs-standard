@@ -12,12 +12,10 @@
     - name: Add NVMe drive as L2ARC
       command: zpool add {{ zpool_name }} cache /dev/nvme0n1
       become: yes
-      # Note: Replace 'mypool' with your ZFS pool name and '/dev/nvme0n1' with your NVMe device.
 
     - name: Add NVMe drive as ZIL
       command: zpool add {{ zpool_name }}} log /dev/nvme1n1
       become: yes
-      # Note: Replace 'mypool' with your ZFS pool name and '/dev/nvme1n1' with your NVMe device.
 
     - name: Enable prefetching
       sysctl:
@@ -29,7 +27,6 @@
     - name: Enable lz4 compression
       command: zfs set compression=lz4 {{ zpool_name }}
       become: yes
-      # Note: Replace 'mypool' with your ZFS pool name.
 
     - name: Get dm device names for multipath devices
       shell: "basename $(readlink -f {{ item }})"

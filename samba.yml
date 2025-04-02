@@ -21,3 +21,15 @@
         name: smb
         enabled: yes
         state: started
+
+    - name: Enable and start nmbd
+      systemd:
+        name: nmbd
+        enabled: yes
+        state: started
+
+    - name: Enable and start winbindd
+      systemd:
+        name: winbindd
+        enabled: yes
+        state: started

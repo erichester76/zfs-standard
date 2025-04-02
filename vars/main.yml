@@ -11,6 +11,8 @@ vdev_count: 7
 disks_per_vdev: 8
 total_disks_for_vdevs: "{{ vdev_count * disks_per_vdev }}"
 spare_count: 4
+arc_nvme: /dev/nvme01
+zil_nvme: /dev/nvme02
 
 # NFS-Ganesha variables
 zfs_dataset_mountpoint: /tank/zettabrick

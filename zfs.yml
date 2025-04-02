@@ -11,6 +11,24 @@
           - disks | length >= total_disks_for_vdevs + spare_count
         fail_msg: "Insufficient disks: {{ disks | length }} provided, but {{ total_disks_for_vdevs + spare_count }} required."
 
+   # Set I/O scheduler to noop for ZFS disks
+    - name: Set I/O scheduler to noop for ZFS disks
+      shell: |
+        for disk in {{ disks | map('basename') | join(' ') }}; do
+          echo noop > /sys/block/$disk/queue/scheduler
+        done
+      when: disks is defined
+
+    # Make the scheduler change persistent
+    - name: Make I/O scheduler change persistent
+      lineinfile:
+        path: /etc/rc.local
+        line: "echo noop > /sys/block/{{ item | basename }}/queue/scheduler"
+        create: yes
+        mode: '0755'
+      loop: "{{ disks }}"
+      when: disks is defined
+
     - name: Create ZFS pool with dynamic vdevs
       command: >
         zpool create -f -o ashift=12 {{ zpool_name }}
@@ -29,3 +47,9 @@
           recordsize: 64K
           compression: lz4
           atime: off
+
+    # Ensure rc.local is executable
+    - name: Ensure rc.local is executable
+      file:
+        path: /etc/rc.local
+        mode: '0755'

@@ -5,5 +5,4 @@
 - import_playbook: zfs.yml
 - import_playbook: nfs_ganesha.yml
 - import_playbook: samba.yml
-- import_playbook: selinux.yml
-- import_playbook: firewall.yml
+- import_playbook: security.yml

@@ -2,19 +2,68 @@
 - name: System Setup
   hosts: zfs_server
   become: yes
-
+  vars_files:
+    - vars/main.yml
   tasks:
+    # Add custom repositories dynamically
+    - name: Add custom repositories
+      yum_repository:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        baseurl: "{{ item.baseurl }}"
+        gpgcheck: "{{ item.gpgcheck }}"
+      loop: "{{ repositories }}"
+
+    # Install Chrony
+    - name: Install Chrony
+      yum:
+        name: chrony
+        state: present
+        proxy: "{{ https_proxy }}"
+
+    # Configure Chrony with NTP servers
+    - name: Configure Chrony with NTP servers
+      lineinfile:
+        path: /etc/chrony.conf
+        regexp: '^server '
+        line: "server {{ item }} iburst"
+      loop: "{{ chrony_ntp_servers }}"
+
+    # Start and enable Chrony
+    - name: Start and enable Chrony
+      systemd:
+        name: chronyd
+        enabled: yes
+        state: started
+
+    # Set DNS servers
+    - name: Set DNS servers
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver '
+        line: "nameserver {{ item }}"
+      loop: "{{ dns_servers }}"
+
+    # System update with proxy
     - name: Update system
       yum:
         name: '*'
         state: latest
+        proxy: "{{ https_proxy }}"
 
-    - name: Install OpenZFS release package
-      yum:
-        name: oracle-openzfs-release-el8
-        state: present
-
+    # Install required packages with proxy
     - name: Install required packages
       yum:
         name: "{{ packages }}"
         state: present
+        proxy: "{{ https_proxy }}"
+
+    # Set hostname
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    # Configure timezone
+    - name: Set timezone
+      timezone:
+        name: America/New_York  # Replace with your desired timezone

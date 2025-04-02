@@ -1,0 +1,80 @@
+---
+- name: Security Configuration
+  hosts: zfs_server
+  become: yes
+  vars_files:
+    - vars/main.yml
+  tasks:
+    # Disable unnecessary services
+    - name: Disable unnecessary services
+      systemd:
+        name: "{{ item }}"
+        enabled: no
+        state: stopped
+      loop: "{{ unnecessary_services }}"
+
+    # Harden SSH by disabling root login
+    - name: Disable root login via SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+      notify: Restart SSH
+
+    # Enable and start firewalld
+    - name: Enable and start firewalld
+      systemd:
+        name: firewalld
+        enabled: yes
+        state: started
+
+    # Allow firewall services
+    - name: Allow firewall services
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop: "{{ firewall_services }}"
+
+    - name: Set SELinux to permissive temporarily
+      command: setenforce {{ selinux_mode }}
+      when: ansible_selinux is defined and ansible_selinux.status is defined 
+      changed_when: true
+
+    - name: Set SELinux to permissive persistently
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: 'SELINUX={{ selinux_mode }}'
+
+    # Install auditd package
+    - name: Install auditd
+      yum:
+        name: audit
+        state: present
+
+    # Add audit rule for command logging
+    - name: Add audit rule for command logging
+      lineinfile:
+        path: /etc/audit/rules.d/audit.rules
+        line: "-a exit,always -F arch=b64 -S execve -k command_logging"
+        create: yes
+      notify: Restart auditd
+
+    # Set up audit rules for monitoring SSH logins
+    - name: Add audit rule for SSH logins
+      lineinfile:
+        path: /etc/audit/rules.d/audit.rules
+        line: "-w /var/log/secure -p wa -k ssh_logins"
+      notify: Restart auditd
+
+  handlers:
+    - name: Restart SSH
+      systemd:
+        name: sshd
+        state: restarted
+
+    - name: Restart auditd
+      systemd:
+        name: auditd
+        state: restarted

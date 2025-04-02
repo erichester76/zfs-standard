@@ -10,11 +10,11 @@
       become: yes
 
     - name: Add NVMe drive as L2ARC
-      command: zpool add {{ zpool_name }} cache /dev/nvme0n1
+      command: zpool add {{ zpool_name }} cache {{ arc_nvme }}
       become: yes
 
     - name: Add NVMe drive as ZIL
-      command: zpool add {{ zpool_name }}} log /dev/nvme1n1
+      command: zpool add {{ zpool_name }}} log {{ zil_nvme }}
       become: yes
 
     - name: Enable prefetching

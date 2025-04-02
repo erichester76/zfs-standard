@@ -1,0 +1,14 @@
+---
+plugin: netbox.netbox.nb_inventory
+api_endpoint: https://your-netbox-instance.com
+token: your_netbox_api_token
+validate_certs: False  # Set to True if your Netbox uses a valid SSL certificate
+query_filters:
+  - role: zfs-server
+  - status: active
+device_query_filters:
+  - has_primary_ip: true
+group_by:
+  - device_roles
+compose:
+  ansible_host: primary_ip4.address

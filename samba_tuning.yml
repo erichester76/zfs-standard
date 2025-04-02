@@ -1,6 +1,6 @@
 ---
 - name: Configure Samba Settings
-  hosts: localhost
+  hosts: servers
   tasks:
     - name: Optimize Samba socket options
       lineinfile:

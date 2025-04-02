@@ -1,6 +1,6 @@
 ---
 - name: Gather multipath devices
-  hosts: zfs_server
+  hosts: servers
   tasks:
     - name: Get list of multipath devices
       shell: "ls /dev/mapper/mpath* 2>/dev/null || echo ''"

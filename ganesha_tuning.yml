@@ -1,6 +1,6 @@
 ---
 - name: Configure NFS-Ganesha Settings
-  hosts: localhost
+  hosts: servers
   tasks:
     - name: Configure Ganesha worker threads
       lineinfile:

@@ -1,6 +1,6 @@
 ---
 - name: Configure ZFS Settings
-  hosts: localhost
+  hosts: servers
   tasks:
     - name: Set ZFS ARC max to 50% of RAM
       sysctl:

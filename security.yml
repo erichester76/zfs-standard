@@ -1,6 +1,6 @@
 ---
 - name: Security Configuration
-  hosts: zfs_server
+  hosts: servers
   become: yes
   vars_files:
     - vars/main.yml

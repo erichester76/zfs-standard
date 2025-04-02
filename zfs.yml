@@ -4,6 +4,9 @@
   become: yes
   vars_files:
     - vars/main.yml
+  vars: 
+    encrypted_devices: "{{ multipath_devices | map('basename') | map('regex_replace', '^', 'encrypted_') | list }}"
+    
   tasks:
     - name: Validate disk count
       assert:
@@ -29,13 +32,13 @@
       loop: "{{ disks }}"
       when: disks is defined
 
-    - name: Create ZFS pool with dynamic vdevs
+    - name: Create ZFS pool with encrypted multipath devices
       command: >
         zpool create -f -o ashift=12 {{ zpool_name }}
         {% for vdev in range(0, total_disks_for_vdevs, disks_per_vdev) %}
-        raidz2 {{ disks[vdev:vdev + disks_per_vdev] | join(' ') }}
+        raidz2 {{ encrypted_devices[vdev:vdev + disks_per_vdev] | map('regex_replace', '^', '/dev/mapper/') | join(' ') }}
         {% endfor %}
-        spare {{ disks[total_disks_for_vdevs:total_disks_for_vdevs + spare_count] | join(' ') }}
+        spare {{ encrypted_devices[total_disks_for_vdevs:total_disks_for_vdevs + spare_count] | map('regex_replace', '^', '/dev/mapper/') | join(' ') }}
       args:
         creates: /{{ zpool_name }}
 

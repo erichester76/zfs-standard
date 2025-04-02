@@ -5,26 +5,26 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - name: Check if disk is LUKS formatted
+    - name: Check if multipath device is already LUKS formatted
       command: cryptsetup isLuks {{ item }}
       register: is_luks
       failed_when: false
       changed_when: false
-      loop: "{{ disks }}"
+      loop: "{{ multipath_devices }}"
 
-    - name: Format disks with LUKS if not already
-      shell: echo "{{ vault_luks_passphrase }}" | cryptsetup luksFormat --batch-mode - {{ item.item }}
-      when: item.rc != 0
+    - name: Format multipath devices with LUKS if not already formatted
+      shell: echo "{{ luks_passphrase }}" | cryptsetup luksFormat --batch-mode - {{ item.item }}
+      when: item.rc != 0  # rc != 0 means it’s not already LUKS formatted
       loop: "{{ is_luks.results }}"
 
-    - name: Open LUKS devices
+    - name: Open LUKS-encrypted multipath devices
       command: cryptsetup luksOpen {{ item }} encrypted_{{ item | basename }}
-      loop: "{{ disks }}"
+      loop: "{{ multipath_devices }}"
 
-    - name: Get UUIDs of disks
+    - name: Get UUIDs of multipath devices
       command: blkid -s UUID -o value {{ item }}
       register: disk_uuids
-      loop: "{{ disks }}"
+      loop: "{{ multipath_devices }}"
 
     - name: Add entries to /etc/crypttab
       lineinfile:

@@ -1,0 +1,41 @@
+---
+- name: Configure Samba Settings
+  hosts: localhost
+  tasks:
+    - name: Optimize Samba socket options
+      lineinfile:
+        path: /etc/samba/smb.conf
+        regexp: '^socket options'
+        line: 'socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072'
+        state: present
+      become: yes
+      # Note: Buffer sizes are set to 128KB; adjust as needed.
+
+    - name: Enable sendfile and set AIO sizes
+      blockinfile:
+        path: /etc/samba/smb.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - AIO and Sendfile"
+        block: |
+          use sendfile = yes
+          min receivefile size = 16384
+          aio read size = 16384
+          aio write size = 16384
+        state: present
+      become: yes
+      # Note: Sizes are set to 16KB; tweak based on performance testing.
+
+    - name: Set Min SMB protocol version to SMB2
+      lineinfile:
+        path: /etc/samba/smb.conf
+        regexp: '^server min protocol'
+        line: 'server min protocol = SMB2'
+        state: present
+      become: yes
+
+    - name: Ensure SMB3 is available
+      lineinfile:
+        path: /etc/samba/smb.conf
+        regexp: '^client max protocol'
+        line: 'client max protocol = SMB3'
+        state: present
+      become: yes

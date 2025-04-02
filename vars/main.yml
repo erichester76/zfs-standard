@@ -6,17 +6,18 @@ mtu: 9000
   
 # ZFS variables
 zpool_name: tank
-zfs_dataset: tank/vmware
+zfs_dataset: tank/zettabrick
 vdev_count: 7
 disks_per_vdev: 8
 total_disks_for_vdevs: "{{ vdev_count * disks_per_vdev }}"
 spare_count: 4
 
 # NFS-Ganesha variables
-zfs_dataset_mountpoint: /tank/vmware
+zfs_dataset_mountpoint: /tank/zettabrick
+nfs_share_name: zettabrick
 
 # Samba variables
-samba_share_name: vmware
+samba_share_name: zettabrick
 samba_users:
   - username
 

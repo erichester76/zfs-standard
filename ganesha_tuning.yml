@@ -1,0 +1,34 @@
+---
+- name: Configure NFS-Ganesha Settings
+  hosts: localhost
+  tasks:
+    - name: Configure Ganesha worker threads
+      lineinfile:
+        path: /etc/ganesha/ganesha.conf
+        regexp: '^Nb_Worker'
+        line: 'Nb_Worker = {{ ansible_processor_cores }};'
+        state: present
+      become: yes
+      # Note: Matches worker threads to CPU core count dynamically.
+
+    - name: Increase metadata cache size
+      lineinfile:
+        path: /etc/ganesha/ganesha.conf
+        regexp: '^MetaData_Cache_Size'
+        line: 'MetaData_Cache_Size = 100000;'
+        state: present
+      become: yes
+      # Note: Adjust '100000' based on your workload needs.
+
+    - name: Set TCP connections and buffer sizes
+      blockinfile:
+        path: /etc/ganesha/ganesha.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - NFS Core Params"
+        block: |
+          NFS_Core_Param {
+              TCP_Connections = 100;
+              RcvBufferSize = 1048576;
+              SndBufferSize = 1048576;
+          }
+        state: present
+      become: yes

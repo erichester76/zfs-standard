@@ -7,3 +7,6 @@
 - import_playbook: zfs.yml
 - import_playbook: nfs_ganesha.yml
 - import_playbook: samba.yml
+- import_playbook: zfs-tuning.yml
+- import_playbook: ganesha-tuning.yml
+- import_playbook: samba-tuning.yml

@@ -1,0 +1,58 @@
+---
+- name: Configure ZFS Settings
+  hosts: localhost
+  tasks:
+    - name: Set ZFS ARC max to 50% of RAM
+      sysctl:
+        name: zfs_arc_max
+        value: "{{ ansible_memtotal_mb * 1024 * 1024 * 0.5 | int }}"
+        state: present
+      become: yes
+
+    - name: Add NVMe drive as L2ARC
+      command: zpool add {{ zpool_name }} cache /dev/nvme0n1
+      become: yes
+      # Note: Replace 'mypool' with your ZFS pool name and '/dev/nvme0n1' with your NVMe device.
+
+    - name: Add NVMe drive as ZIL
+      command: zpool add {{ zpool_name }}} log /dev/nvme1n1
+      become: yes
+      # Note: Replace 'mypool' with your ZFS pool name and '/dev/nvme1n1' with your NVMe device.
+
+    - name: Enable prefetching
+      sysctl:
+        name: vfs.zfs.prefetch_disable
+        value: 0
+        state: present
+      become: yes
+
+    - name: Enable lz4 compression
+      command: zfs set compression=lz4 {{ zpool_name }}
+      become: yes
+      # Note: Replace 'mypool' with your ZFS pool name.
+
+    - name: Get dm device names for multipath devices
+      shell: "basename $(readlink -f {{ item }})"
+      loop: "{{ multipath_devices }}"
+      register: dm_devices
+
+    - name: Set I/O scheduler to noop for multipath devices
+      shell: "echo noop > /sys/block/{{ item.stdout }}/queue/scheduler"
+      loop: "{{ dm_devices.results }}"
+      when: item.stdout is defined
+
+    # Make the scheduler change persistent
+    - name: Make I/O scheduler change persistent
+      lineinfile:
+        path: /etc/rc.local
+        line: "echo noop > /sys/block/{{ item.stdout }}/queue/scheduler"
+        create: yes
+        mode: '0755'
+      loop: "{{ dm_devices.results }}"
+      when: item.stdout is defined
+
+    # Ensure rc.local is executable
+    - name: Ensure rc.local is executable
+      file:
+        path: /etc/rc.local
+        mode: '0755'

@@ -21,13 +21,22 @@ The repository is organized into multiple YAML files, each handling a specific p
   Manages LUKS encryption for disks: encrypts multipath devices and sets up automatic decryption during boot.
 
 - **`zfs.yml`**  
-  Configures the ZFS storage pool: creates pools with encrypted multipath devices, sets up datasets, and applies optimizations like `noop` I/O scheduling.
+  Configures the ZFS storage pool: creates pools with encrypted multipath devices, sets up datasets.
 
 - **`nfs_ganesha.yml`**  
   Sets up NFS-Ganesha for NFS shares: configures exports and tunes worker threads for concurrency.
 
 - **`samba.yml`**  
   Configures Samba for SMB/CIFS sharing: sets up shares, optimizes socket options, and enables asynchronous I/O.
+
+- **`zfs_tuning.yml`**  
+  Tuning configuration specific to ZFS
+
+- **`ganesha_tuning.yml`**  
+  Tuning configuration specific to Ganesha/NFS
+
+- **`samba_tuning.yml`**  
+  Tuning configuration specific to Samba
 
 - **`security.yml`**  
   Applies security hardening: disables unnecessary services, secures SSH, configures firewall rules, manages SELinux, and enables audit logging.
@@ -44,10 +53,10 @@ The repository is organized into multiple YAML files, each handling a specific p
 - **`inventory/netbox_inventory.yml`**  
   A dynamic inventory file using the Netbox plugin to fetch devices with the "zfs-server" role and "active" status.
 
-- **`templates/smb.conf.j2`**
+- **`templates/smb.conf.j2`**  
   Base samba configuraiton file
 
-- **`templates/ganehsa.conf.j2`**
+- **`templates/ganehsa.conf.j2`**  
   Base nfs configuraiton file
 
 ---
